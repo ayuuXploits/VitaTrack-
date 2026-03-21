@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VitaTrack — Your Health Companion</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gain: #f97316;
+    --lose: #22c55e;
+    --maintain: #6366f1;
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --surface2: #1c1c28;
+    --border: #2a2a3a;
+    --text: #f0f0f5;
+    --muted: #8888aa;
+    --accent: var(--maintain);
+    --card-radius: 20px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* BACKGROUND */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 20% 10%, rgba(99,102,241,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 40% at 80% 80%, rgba(249,115,22,0.10) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 30% at 60% 40%, rgba(34,197,94,0.07) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 32px 20px 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* HEADER */
+  header {
+    text-align: center;
+    margin-bottom: 48px;
+    animation: fadeDown 0.7s ease both;
+  }
+
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2rem, 6vw, 3.5rem);
+    font-weight: 800;
+    letter-spacing: -1px;
+    background: linear-gradient(135deg, #6366f1 20%, #a78bfa 50%, #f97316 90%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .tagline {
+    color: var(--muted);
+    font-size: 1rem;
+    margin-top: 6px;
+    font-weight: 300;
+    letter-spacing: 0.5px;
+  }
+
+  /* GOAL SELECTOR */
+  .goal-section { margin-bottom: 40px; animation: fadeUp 0.7s 0.1s ease both; }
+
+  .section-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+
+  .goal-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+
+  .goal-card {
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: var(--card-radius);
+    padding: 22px 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .goal-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--c);
+    opacity: 0;
+    transition: opacity 0.25s;
+  }
+
+  .goal-card:hover::before { opacity: 0.06; }
+  .goal-card.active::before { opacity: 0.12; }
+
+  .goal-card[data-goal="gain"] { --c: var(--gain); }
+  .goal-card[data-goal="lose"] { --c: var(--lose); }
+  .goal-card[data-goal="maintain"] { --c: var(--maintain); }
+
+  .goal-card.active { border-color: var(--c); }
+  .goal-card.active .goal-icon { transform: scale(1.15); }
+
+  .goal-icon {
+    font-size: 2rem;
+    margin-bottom: 10px;
+    display: block;
+    transition: transform 0.25s;
+  }
+
+  .goal-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+    color: var(--text);
+  }
+
+  .goal-desc {
+    font-size: 0.75rem;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+
+  /* FORM */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 40px;
+    animation: fadeUp 0.7s 0.2s ease both;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .field label {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--muted);
+    letter-spacing: 0.3px;
+  }
+
+  .field input, .field select {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 13px 16px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s, background 0.2s;
+    width: 100%;
+  }
+
+  .field input:focus, .field select:focus {
+    border-color: var(--accent);
+    background: var(--surface2);
+  }
+
+  .field select option { background: #1c1c28; }
+
+  .btn-calculate {
+    grid-column: 1 / -1;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    padding: 16px;
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-calculate::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.15);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .btn-calculate:hover::after { opacity: 1; }
+  .btn-calculate:active { transform: scale(0.98); }
+
+  /* RESULTS */
+  #results {
+    display: none;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  #results.show { display: block; }
+
+  .results-header {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+
+  .metric-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--card-radius);
+    padding: 22px 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .metric-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--accent);
+    border-radius: 99px;
+  }
+
+  .metric-label {
+    font-size: 0.73rem;
+    color: var(--muted);
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .metric-value {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.9rem;
+    font-weight: 800;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .metric-unit {
+    font-size: 0.8rem;
+    color: var(--muted);
+    font-weight: 400;
+    margin-top: 4px;
+  }
+
+  /* BMI BAR */
+  .bmi-section {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--card-radius);
+    padding: 24px;
+    margin-bottom: 28px;
+  }
+
+  .bmi-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 16px;
+  }
+
+  .bmi-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  .bmi-badge {
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 99px;
+    background: rgba(99,102,241,0.2);
+    color: var(--accent);
+  }
+
+  .bmi-track {
+    height: 8px;
+    border-radius: 99px;
+    background: linear-gradient(to right, #6366f1 0%, #22c55e 30%, #f59e0b 65%, #ef4444 100%);
+    position: relative;
+    margin-bottom: 8px;
+  }
+
+  .bmi-pointer {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    border: 3px solid var(--accent);
+    box-shadow: 0 0 10px rgba(99,102,241,0.6);
+    transition: left 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .bmi-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.68rem;
+    color: var(--muted);
+    margin-top: 10px;
+  }
+
+  /* PLAN */
+  .plan-section {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--card-radius);
+    padding: 24px;
+    margin-bottom: 28px;
+  }
+
+  .plan-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 800;
+    margin-bottom: 20px;
+  }
+
+  .plan-items {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .plan-item {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    padding: 14px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+  }
+
+  .plan-item-icon {
+    font-size: 1.3rem;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .plan-item-text strong {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 3px;
+  }
+
+  .plan-item-text span {
+    font-size: 0.8rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  /* MACRO BARS */
+  .macro-section {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--card-radius);
+    padding: 24px;
+    margin-bottom: 28px;
+  }
+
+  .macro-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 800;
+    margin-bottom: 20px;
+  }
+
+  .macro-row {
+    margin-bottom: 16px;
+  }
+
+  .macro-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    font-size: 0.85rem;
+  }
+
+  .macro-info span:first-child { font-weight: 500; }
+  .macro-info span:last-child { color: var(--muted); }
+
+  .macro-bar-bg {
+    height: 7px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+
+  .macro-bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+    width: 0%;
+  }
+
+  /* WATER TRACKER */
+  .water-section {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--card-radius);
+    padding: 24px;
+    margin-bottom: 28px;
+  }
+
+  .water-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 800;
+    margin-bottom: 16px;
+  }
+
+  .water-glasses {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+
+  .glass {
+    width: 40px;
+    height: 52px;
+    border-radius: 4px 4px 8px 8px;
+    border: 2px solid #3b4a6b;
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: flex-end;
+    overflow: hidden;
+    transition: transform 0.15s;
+    position: relative;
+  }
+
+  .glass:hover { transform: scale(1.1); }
+
+  .glass.filled {
+    border-color: #38bdf8;
+  }
+
+  .glass-fill {
+    width: 100%;
+    height: 0%;
+    background: linear-gradient(180deg, #7dd3fc, #0ea5e9);
+    transition: height 0.3s ease;
+    border-radius: 2px 2px 6px 6px;
+  }
+
+  .glass.filled .glass-fill { height: 100%; }
+
+  .water-text {
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+
+  .water-text strong {
+    color: #38bdf8;
+    font-family: 'Syne', sans-serif;
+  }
+
+  /* FOOD LOG */
+  .food-section {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--card-radius);
+    padding: 24px;
+    margin-bottom: 28px;
+  }
+
+  .food-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 800;
+    margin-bottom: 16px;
+  }
+
+  .food-input-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .food-input-row input {
+    flex: 1;
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 11px 14px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .food-input-row input:focus { border-color: var(--accent); }
+
+  .btn-add {
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 11px 18px;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .btn-add:hover { border-color: var(--accent); color: var(--accent); }
+
+  .food-log {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  .food-log::-webkit-scrollbar { width: 4px; }
+  .food-log::-webkit-scrollbar-track { background: transparent; }
+  .food-log::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+  .food-entry {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 0.85rem;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .food-entry span { color: var(--muted); }
+
+  .food-entry button {
+    background: none;
+    border: none;
+    color: #ef4444;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0 4px;
+    opacity: 0.6;
+    transition: opacity 0.15s;
+  }
+
+  .food-entry button:hover { opacity: 1; }
+
+  /* PROGRESS RING */
+  .calorie-ring-wrap {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    margin-bottom: 28px;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--card-radius);
+    padding: 24px;
+  }
+
+  .ring-container { position: relative; flex-shrink: 0; }
+
+  .ring-svg { transform: rotate(-90deg); }
+
+  .ring-bg { fill: none; stroke: var(--border); stroke-width: 8; }
+  .ring-fill { fill: none; stroke-width: 8; stroke-linecap: round;
+    stroke-dasharray: 283; stroke-dashoffset: 283;
+    transition: stroke-dashoffset 0.8s cubic-bezier(0.34,1.56,0.64,1);
+    stroke: var(--accent);
+  }
+
+  .ring-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .ring-pct {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .ring-lbl {
+    font-size: 0.62rem;
+    color: var(--muted);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .ring-info { flex: 1; }
+
+  .ring-info h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+
+  .ring-stat {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.82rem;
+    padding: 5px 0;
+    border-bottom: 1px solid var(--border);
+    color: var(--muted);
+  }
+
+  .ring-stat:last-child { border-bottom: none; }
+  .ring-stat strong { color: var(--text); font-weight: 500; }
+
+  /* ANIMATIONS */
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 600px) {
+    .goal-cards { grid-template-columns: 1fr; }
+    .form-grid { grid-template-columns: 1fr; }
+    .metrics-grid { grid-template-columns: 1fr; }
+    .calorie-ring-wrap { flex-direction: column; align-items: flex-start; }
+  }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    color: var(--text);
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-size: 0.87rem;
+    font-weight: 500;
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 100;
+    pointer-events: none;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div class="logo">VitaTrack</div>
+    <p class="tagline">Smart nutrition & fitness calculator for your goals</p>
+  </header>
+
+  <!-- GOAL SELECTOR -->
+  <div class="goal-section">
+    <div class="section-label">Choose Your Goal</div>
+    <div class="goal-cards">
+      <div class="goal-card" data-goal="gain" onclick="selectGoal('gain')">
+        <span class="goal-icon">📈</span>
+        <div class="goal-name">Gain Weight</div>
+        <div class="goal-desc">Build mass & muscle with a caloric surplus</div>
+      </div>
+      <div class="goal-card active" data-goal="lose" onclick="selectGoal('lose')">
+        <span class="goal-icon">🔥</span>
+        <div class="goal-name">Lose Weight</div>
+        <div class="goal-desc">Burn fat with smart caloric deficit</div>
+      </div>
+      <div class="goal-card" data-goal="maintain" onclick="selectGoal('maintain')">
+        <span class="goal-icon">⚖️</span>
+        <div class="goal-name">Stay Healthy</div>
+        <div class="goal-desc">Maintain weight & optimize wellbeing</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INPUT FORM -->
+  <div class="form-grid">
+    <div class="field">
+      <label>Age (years)</label>
+      <input type="number" id="age" placeholder="e.g. 25" min="10" max="100">
+    </div>
+    <div class="field">
+      <label>Gender</label>
+      <select id="gender">
+        <option value="male">Male</option>
+        <option value="female">Female</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Weight (kg)</label>
+      <input type="number" id="weight" placeholder="e.g. 70" min="20" max="300">
+    </div>
+    <div class="field">
+      <label>Height (cm)</label>
+      <input type="number" id="height" placeholder="e.g. 175" min="100" max="250">
+    </div>
+    <div class="field" style="grid-column:1/-1">
+      <label>Activity Level</label>
+      <select id="activity">
+        <option value="1.2">Sedentary (little/no exercise)</option>
+        <option value="1.375">Lightly Active (1–3 days/week)</option>
+        <option value="1.55" selected>Moderately Active (3–5 days/week)</option>
+        <option value="1.725">Very Active (6–7 days/week)</option>
+        <option value="1.9">Super Active (physical job + daily exercise)</option>
+      </select>
+    </div>
+    <button class="btn-calculate" onclick="calculate()">Calculate My Plan ✦</button>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="results">
+    <div class="results-header">
+      <span id="results-icon">🎯</span>
+      <span id="results-title">Your Plan</span>
+    </div>
+
+    <!-- CALORIE RING -->
+    <div class="calorie-ring-wrap">
+      <div class="ring-container">
+        <svg class="ring-svg" width="120" height="120" viewBox="0 0 100 100">
+          <circle class="ring-bg" cx="50" cy="50" r="45"/>
+          <circle class="ring-fill" id="ringFill" cx="50" cy="50" r="45"/>
+        </svg>
+        <div class="ring-center">
+          <div class="ring-pct" id="ringPct">0%</div>
+          <div class="ring-lbl">Goal</div>
+        </div>
+      </div>
+      <div class="ring-info">
+        <h3>Daily Calorie Target</h3>
+        <div class="ring-stat"><span>BMR (base)</span><strong id="bmrStat">—</strong></div>
+        <div class="ring-stat"><span>Maintenance</span><strong id="maintStat">—</strong></div>
+        <div class="ring-stat"><span>Your Target</span><strong id="targetStat">—</strong></div>
+        <div class="ring-stat"><span>Logged Today</span><strong id="loggedStat">0 kcal</strong></div>
+      </div>
+    </div>
+
+    <!-- METRICS -->
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-label">BMI</div>
+        <div class="metric-value" id="bmiVal">—</div>
+        <div class="metric-unit" id="bmiCat">Body Mass Index</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Ideal Weight Range</div>
+        <div class="metric-value" id="idealWt">—</div>
+        <div class="metric-unit">kg (BMI 18.5–24.9)</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Protein Goal</div>
+        <div class="metric-value" id="proteinVal">—</div>
+        <div class="metric-unit">grams/day</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Est. Timeline</div>
+        <div class="metric-value" id="timelineVal">—</div>
+        <div class="metric-unit" id="timelineUnit">to reach target</div>
+      </div>
+    </div>
+
+    <!-- BMI BAR -->
+    <div class="bmi-section">
+      <div class="bmi-header">
+        <span class="bmi-title">BMI Scale</span>
+        <span class="bmi-badge" id="bmiBadge">Normal</span>
+      </div>
+      <div class="bmi-track">
+        <div class="bmi-pointer" id="bmiPointer" style="left:0%"></div>
+      </div>
+      <div class="bmi-labels">
+        <span>Underweight<br>&lt;18.5</span>
+        <span>Normal<br>18.5–24.9</span>
+        <span>Overweight<br>25–29.9</span>
+        <span>Obese<br>&gt;30</span>
+      </div>
+    </div>
+
+    <!-- MACROS -->
+    <div class="macro-section">
+      <div class="macro-title">Daily Macro Targets</div>
+      <div class="macro-row">
+        <div class="macro-info"><span>🍗 Protein</span><span id="proteinG">—</span></div>
+        <div class="macro-bar-bg"><div class="macro-bar-fill" id="pBar" style="background:#6366f1"></div></div>
+      </div>
+      <div class="macro-row">
+        <div class="macro-info"><span>🍞 Carbohydrates</span><span id="carbG">—</span></div>
+        <div class="macro-bar-bg"><div class="macro-bar-fill" id="cBar" style="background:#f97316"></div></div>
+      </div>
+      <div class="macro-row">
+        <div class="macro-info"><span>🥑 Fats</span><span id="fatG">—</span></div>
+        <div class="macro-bar-bg"><div class="macro-bar-fill" id="fBar" style="background:#22c55e"></div></div>
+      </div>
+    </div>
+
+    <!-- PLAN TIPS -->
+    <div class="plan-section">
+      <div class="plan-title" id="planTitle">🗒 Personalized Plan</div>
+      <div class="plan-items" id="planItems"></div>
+    </div>
+
+    <!-- WATER TRACKER -->
+    <div class="water-section">
+      <div class="water-title">💧 Daily Hydration Tracker</div>
+      <div class="water-glasses" id="waterGlasses"></div>
+      <div class="water-text">
+        <strong id="waterCount">0</strong> / <span id="waterGoal">8</span> glasses today
+        — Click a glass to log it!
+      </div>
+    </div>
+
+    <!-- FOOD LOG -->
+    <div class="food-section">
+      <div class="food-title">🍽 Calorie Log</div>
+      <div class="food-input-row">
+        <input type="text" id="foodName" placeholder="Food item (e.g. Rice 1 cup)">
+        <input type="number" id="foodCal" placeholder="kcal" style="max-width:90px">
+        <button class="btn-add" onclick="addFood()">+ Add</button>
+      </div>
+      <div class="food-log" id="foodLog"></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let selectedGoal = 'lose';
+  let dailyTarget = 2000;
+  let totalLogged = 0;
+  const foodItems = [];
+  let waterGoal = 8;
+  let waterCount = 0;
+
+  function selectGoal(goal) {
+    selectedGoal = goal;
+    document.querySelectorAll('.goal-card').forEach(c => c.classList.remove('active'));
+    document.querySelector(`[data-goal="${goal}"]`).classList.add('active');
+    updateAccentColor(goal);
+  }
+
+  function updateAccentColor(goal) {
+    const map = { gain: 'var(--gain)', lose: 'var(--lose)', maintain: 'var(--maintain)' };
+    document.documentElement.style.setProperty('--accent', map[goal]);
+  }
+
+  function calculate() {
+    const age = parseFloat(document.getElementById('age').value);
+    const gender = document.getElementById('gender').value;
+    const weight = parseFloat(document.getElementById('weight').value);
+    const height = parseFloat(document.getElementById('height').value);
+    const activity = parseFloat(document.getElementById('activity').value);
+
+    if (!age || !weight || !height || age < 10 || weight < 20 || height < 100) {
+      showToast('⚠️ Please fill in all fields correctly.');
+      return;
+    }
+
+    // BMR (Mifflin-St Jeor)
+    let bmr;
+    if (gender === 'male') bmr = 10 * weight + 6.25 * height - 5 * age + 5;
+    else bmr = 10 * weight + 6.25 * height - 5 * age - 161;
+
+    const tdee = Math.round(bmr * activity);
+    let target;
+    if (selectedGoal === 'lose') target = tdee - 500;
+    else if (selectedGoal === 'gain') target = tdee + 400;
+    else target = tdee;
+
+    target = Math.max(target, 1200);
+
+    // BMI
+    const heightM = height / 100;
+    const bmi = (weight / (heightM * heightM)).toFixed(1);
+    const idealLow = Math.round(18.5 * heightM * heightM);
+    const idealHigh = Math.round(24.9 * heightM * heightM);
+
+    // Macros
+    let pPct, cPct, fPct;
+    if (selectedGoal === 'gain') { pPct=0.30; cPct=0.45; fPct=0.25; }
+    else if (selectedGoal === 'lose') { pPct=0.35; cPct=0.35; fPct=0.30; }
+    else { pPct=0.25; cPct=0.50; fPct=0.25; }
+
+    const pG = Math.round(target * pPct / 4);
+    const cG = Math.round(target * cPct / 4);
+    const fG = Math.round(target * fPct / 9);
+
+    dailyTarget = target;
+    waterGoal = Math.round(weight * 0.033);
+    if (waterGoal < 6) waterGoal = 6;
+    if (waterGoal > 12) waterGoal = 12;
+
+    // BMI category & pointer
+    let bmiCat, bmiPct;
+    if (bmi < 18.5) { bmiCat = 'Underweight'; bmiPct = Math.max(0, (bmi / 18.5) * 20); }
+    else if (bmi < 25) { bmiCat = 'Normal Weight'; bmiPct = 20 + ((bmi - 18.5) / 6.4) * 30; }
+    else if (bmi < 30) { bmiCat = 'Overweight'; bmiPct = 50 + ((bmi - 25) / 5) * 25; }
+    else { bmiCat = 'Obese'; bmiPct = Math.min(100, 75 + ((bmi - 30) / 10) * 25); }
+
+    // Timeline
+    let timeline, timelineUnit;
+    const wtDiff = selectedGoal === 'lose' ? Math.abs(weight - idealLow) : (selectedGoal === 'gain' ? Math.abs(idealHigh - weight) : 0);
+    if (selectedGoal === 'maintain') {
+      timeline = '∞'; timelineUnit = 'staying balanced';
+    } else {
+      const weeks = Math.ceil(wtDiff / 0.5);
+      timeline = weeks > 52 ? Math.ceil(weeks/4) + ' mo' : weeks + ' wks';
+      timelineUnit = `to reach ${selectedGoal === 'lose' ? 'ideal low' : 'ideal high'} (${selectedGoal === 'lose' ? idealLow : idealHigh} kg)`;
+    }
+
+    // Render
+    updateAccentColor(selectedGoal);
+    document.getElementById('results').classList.add('show');
+
+    // Metrics
+    document.getElementById('bmiVal').textContent = bmi;
+    document.getElementById('bmiCat').textContent = bmiCat;
+    document.getElementById('idealWt').textContent = `${idealLow}–${idealHigh}`;
+    document.getElementById('proteinVal').textContent = pG;
+    document.getElementById('timelineVal').textContent = timeline;
+    document.getElementById('timelineUnit').textContent = timelineUnit;
+
+    // Ring
+    document.getElementById('bmrStat').textContent = Math.round(bmr) + ' kcal';
+    document.getElementById('maintStat').textContent = tdee + ' kcal';
+    document.getElementById('targetStat').textContent = target + ' kcal';
+    document.getElementById('loggedStat').textContent = totalLogged + ' kcal';
+
+    setTimeout(() => {
+      const pct = Math.min(100, Math.round((totalLogged / target) * 100));
+      animateRing(pct);
+    }, 300);
+
+    // BMI pointer
+    setTimeout(() => {
+      document.getElementById('bmiPointer').style.left = Math.min(97, Math.max(3, bmiPct)) + '%';
+    }, 400);
+    document.getElementById('bmiBadge').textContent = bmiCat;
+
+    // Macro bars
+    const total = pPct + cPct + fPct;
+    document.getElementById('proteinG').textContent = pG + 'g';
+    document.getElementById('carbG').textContent = cG + 'g';
+    document.getElementById('fatG').textContent = fG + 'g';
+    setTimeout(() => {
+      document.getElementById('pBar').style.width = (pPct/total*100) + '%';
+      document.getElementById('cBar').style.width = (cPct/total*100) + '%';
+      document.getElementById('fBar').style.width = (fPct/total*100) + '%';
+    }, 500);
+
+    // Plan tips
+    renderPlan(selectedGoal, target, bmi);
+
+    // Water
+    renderWater();
+
+    // Scroll
+    setTimeout(() => document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+    showToast('✅ Your personalized plan is ready!');
+  }
+
+  function animateRing(pct) {
+    const circumference = 283;
+    const offset = circumference - (pct / 100) * circumference;
+    document.getElementById('ringFill').style.strokeDashoffset = offset;
+    document.getElementById('ringPct').textContent = pct + '%';
+  }
+
+  function renderPlan(goal, target, bmi) {
+    const plans = {
+      lose: [
+        { icon: '🥗', title: 'Eat in a Caloric Deficit', text: `Consume ${target} kcal/day — roughly 500 kcal below maintenance. Focus on whole foods, lean proteins, and fiber-rich vegetables.` },
+        { icon: '🏃', title: 'Cardio + Strength Training', text: 'Aim for 150+ min of moderate cardio weekly plus 3 strength sessions to preserve muscle while burning fat.' },
+        { icon: '😴', title: 'Prioritize Sleep', text: 'Get 7–9 hours. Sleep deprivation increases ghrelin (hunger hormone) and leads to fat retention.' },
+        { icon: '📉', title: 'Track Your Progress Weekly', text: 'Weigh yourself same time each morning, once a week. Expect 0.3–0.7 kg/week of healthy loss.' }
+      ],
+      gain: [
+        { icon: '🍗', title: 'Caloric Surplus + Protein', text: `Eat ${target} kcal/day. Prioritize protein-dense foods — aim for ${Math.round(target*0.30/4)}g protein to support muscle synthesis.` },
+        { icon: '🏋️', title: 'Progressive Resistance Training', text: 'Lift weights 4–5x/week with progressive overload. Compound movements (squat, deadlift, bench) are key.' },
+        { icon: '🕐', title: 'Eat Frequently', text: 'Spread calories over 4–6 meals/day. Add healthy calorie-dense snacks: nuts, nut butter, whole milk, bananas.' },
+        { icon: '📈', title: 'Monitor Lean Mass Gain', text: 'Expect 0.5–1 kg/month of lean gain. If gaining too fast (>1kg/wk), excess may be fat — reduce surplus slightly.' }
+      ],
+      maintain: [
+        { icon: '⚖️', title: 'Eat at Maintenance Calories', text: `${target} kcal/day keeps your weight stable. Balance across proteins, carbs, and fats for optimal health.` },
+        { icon: '🧘', title: 'Stay Active Daily', text: 'Combine strength training, cardio, and flexibility work. Even 30 min of walking daily makes a major difference.' },
+        { icon: '🥦', title: 'Micronutrients Matter', text: 'Focus on colorful vegetables, fruits, whole grains. Ensure adequate vitamins D, B12, magnesium, and iron.' },
+        { icon: '🧠', title: 'Mental & Metabolic Health', text: 'Manage stress, limit alcohol, avoid ultra-processed foods. Your gut microbiome thrives on dietary variety.' }
+      ]
+    };
+
+    const icons = { lose: '🔥', gain: '📈', maintain: '⚖️' };
+    const titles = { lose: '🔥 Fat Loss Plan', gain: '📈 Muscle & Weight Gain Plan', maintain: '⚖️ Health Maintenance Plan' };
+    document.getElementById('planTitle').textContent = titles[goal];
+    const container = document.getElementById('planItems');
+    container.innerHTML = '';
+    plans[goal].forEach(item => {
+      container.innerHTML += `
+        <div class="plan-item">
+          <span class="plan-item-icon">${item.icon}</span>
+          <div class="plan-item-text">
+            <strong>${item.title}</strong>
+            <span>${item.text}</span>
+          </div>
+        </div>`;
+    });
+  }
+
+  function renderWater() {
+    const container = document.getElementById('waterGlasses');
+    container.innerHTML = '';
+    document.getElementById('waterGoal').textContent = waterGoal;
+    waterCount = 0;
+    document.getElementById('waterCount').textContent = 0;
+    for (let i = 0; i < waterGoal; i++) {
+      const g = document.createElement('div');
+      g.className = 'glass';
+      g.innerHTML = '<div class="glass-fill"></div>';
+      g.dataset.index = i;
+      g.onclick = () => toggleGlass(g, i);
+      container.appendChild(g);
+    }
+  }
+
+  function toggleGlass(el, i) {
+    const filled = el.classList.toggle('filled');
+    waterCount += filled ? 1 : -1;
+    document.getElementById('waterCount').textContent = waterCount;
+    if (waterCount === waterGoal) showToast('💧 Hydration goal reached! Amazing!');
+  }
+
+  function addFood() {
+    const name = document.getElementById('foodName').value.trim();
+    const cal = parseInt(document.getElementById('foodCal').value);
+    if (!name || !cal || cal < 1) { showToast('⚠️ Enter food name and calories.'); return; }
+
+    foodItems.push({ name, cal });
+    totalLogged += cal;
+
+    const log = document.getElementById('foodLog');
+    const entry = document.createElement('div');
+    entry.className = 'food-entry';
+    const idx = foodItems.length - 1;
+    entry.innerHTML = `<strong>${name}</strong><span>${cal} kcal</span><button onclick="removeFood(${idx}, this)">&times;</button>`;
+    log.appendChild(entry);
+
+    document.getElementById('foodName').value = '';
+    document.getElementById('foodCal').value = '';
+
+    document.getElementById('loggedStat').textContent = totalLogged + ' kcal';
+    const pct = Math.min(100, Math.round((totalLogged / dailyTarget) * 100));
+    animateRing(pct);
+
+    if (totalLogged >= dailyTarget) showToast('🎉 Daily calorie goal reached!');
+  }
+
+  function removeFood(idx, btn) {
+    totalLogged -= foodItems[idx].cal;
+    foodItems[idx] = null;
+    btn.closest('.food-entry').remove();
+    document.getElementById('loggedStat').textContent = totalLogged + ' kcal';
+    const pct = Math.min(100, Math.round((totalLogged / dailyTarget) * 100));
+    animateRing(pct);
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+</script>
+</body>
+</html>
