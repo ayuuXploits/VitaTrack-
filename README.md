@@ -45,9 +45,9 @@ cd vitatrack
 
 🛠️ Built With
 
-HTML / CSS / JavaScript — zero dependencies
+HTML / CSS / JavaScript — zero dependencies.
 Syne & DM Sans — typography
-Pure CSS animations — smooth, lightweight UI
+Pure CSS animations — smooth, lightweight UI.
 
 
 👨‍💻 Developer
