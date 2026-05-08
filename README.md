@@ -1,38 +1,41 @@
-# VITATRACK                                          
-                                                                                   
-                                                                                   
+# 🎯 VitaTrack 
+**Smart Nutrition & Personalized Fitness for your Goals**
 
-  +----------+    +----------+    +----------+    +----------+
-  | CALORIES |    |  MACROS  |    |  WATER   |    | WORKOUT  |
-  |  TARGET  |    | P/C/F    |    |  INTAKE  |    | ROUTINE  |
-  +----+-----+    +----+-----+    +----+-----+    +----+-----+
-       |               |               |               |
-       +---------------+---------------+---------------+
-                       |   VITATRACK   |
-                       |  [ GOAL SET ] |
-                       |  [  RESULTS ] |
-                       +---------------+
-                  Gain | Lose | Maintain
-💪 About
-VitaTrack is a smart all-in-one nutrition and fitness web app built around your goal. Whether you're bulking, cutting, or maintaining — VitaTrack calculates your personalized calorie targets, macro splits, BMI, and generates a full weekly workout routine tailored to your body and lifestyle.
-No fluff. No subscriptions. Just science-backed numbers and a clean dashboard that keeps you on track.
+VitaTrack is a high-performance, client-side health and fitness dashboard. It combines sleek design with functional intelligence to help users track nutrition, manage workouts, and monitor holistic wellness in a single, seamless interface.
 
-🎯 Pick Your Goal
-GoalWhat it does🟠 Muscle GainCaloric surplus with high protein macros🟢 Fat LossCaloric deficit optimized for fat burn🟣 MaintainBalanced TDEE maintenance plan
+---
 
-⚡ Features
+## 🚀 Key Features
 
-Smart Calorie Calculator — TDEE based on age, weight, height, gender and activity level
-Macro Breakdown — Personalized Protein / Carbs / Fats split with visual progress bars
-BMI Tracker — Live BMI gauge with category indicator
-Weekly Workout Planner — Day-by-day exercise routine with sets, reps and rest times
-Exercise Library — Filterable library of exercises with muscle group tags
-Smart Food Logger — Searchable food database with autocomplete and calorie tracking
-Water Intake Tracker — Visual glass-by-glass hydration logger
-Workout Type Selector — Gym, Home, or No Equipment modes
-Fully Responsive — Works beautifully on mobile and desktop
+### 🍽️ Smart Nutrition & Calorie Tracking
+* **Searchable Food Database:** Instant calorie lookups for 50+ common foods (including diverse Indian cuisine like Poha, Roti, and Biryani).
+* **Dynamic Calorie Ring:** Real-time visualization of your daily caloric budget vs. intake.
+* **Macro Breakdown:** Automated calculation of Protein, Carb, and Fat targets based on your specific goal.
+* **Meal Templates:** Save your favorite combinations for one-click logging.
 
+### 💪 Personalized Workout Engine
+* **Adaptive Routines:** Context-aware plans for **Gym**, **Home**, or **No-Workout** lifestyles.
+* **Guided Workout Mode:** A step-by-step training interface that leads you through your sets and reps.
+* **Integrated Rest Timer:** Built-in timers with audio-visual cues to optimize recovery between sets.
+* **Exercise Library:** Comprehensive technical guides for compound and isolation movements.
 
+### 📈 Progress & Wellness Analytics
+* **Weight Trends:** Interactive charts with 7-day moving averages using Chart.js.
+* **Body Metrics:** Log measurements for chest, waist, hips, and arms to track physical changes.
+* **Sleep & Mood Tracking:** Analyze the correlation between your rest, energy levels, and training performance.
+* **Hydration:** Visual water tracker to ensure you hit your daily intake goals.
+
+### 🏆 Motivation & Gamification
+* **Activity Heatmap:** GitHub-style contribution grid for tracking workout consistency.
+* **Daily Challenges:** Rotating tasks to keep you engaged with your health habits.
+* **Achievement Badges:** Unlock milestones like "Protein Hero" or "7-Day Streak."
+
+---
+## 📦 Getting Started
+
+1. **Clone the repository**
+   ```bash
+   git clone [https://github.com/ayuuXploits/vitatrack_v2.1.3.git](https://github.com/ayuuXploits/vitatrack_v2.1.3.git)
 🚀 Getting Started
 bashgit clone https://github.com/ayuuXploits/vitatrack
 cd vitatrack
