@@ -36,6 +36,7 @@ VitaTrack is a high-performance, client-side health and fitness dashboard. It co
 1. **Clone the repository**
    ```bash
    git clone [https://github.com/ayuuXploits/vitatrack_v2.1.3.git](https://github.com/ayuuXploits/vitatrack_v2.1.3.git)
+   
 🚀 Getting Started
 bashgit clone https://github.com/ayuuXploits/vitatrack
 cd vitatrack
